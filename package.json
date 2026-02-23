@@ -1,0 +1,56 @@
+{
+    "name": "teams-linux",
+    "version": "1.0.0",
+    "main": "main.js",
+    "private": true,
+    "description": "Microsoft Teams desktop wrapper for Linux",
+    "homepage": "https://teams.microsoft.com",
+    "author": {
+        "name": "Hong Kim",
+        "email": "xuanhongkim@gmail.com"
+    },
+    "scripts": {
+        "start": "electron .",
+        "dist": "electron-builder"
+    },
+    "devDependencies": {
+        "electron": "^40.3.0",
+        "electron-builder": "^26.7.0"
+    },
+    "build": {
+        "appId": "com.teams.linux",
+        "productName": "Microsoft Teams",
+        "files": [
+            "**/*",
+            "!build"
+        ],
+        "linux": {
+            "target": [
+                "deb"
+            ],
+            "category": "Network",
+            "icon": "build/icons",
+            "maintainer": "Hong Kim xuanhongkim@gmail.com",
+            "desktop": {
+                "entry": {
+                    "Name": "Microsoft Teams",
+                    "Comment": "Microsoft Teams for Linux",
+                    "GenericName": "Instant Messenger",
+                    "Keywords": "chat;messenger;teams;microsoft;",
+                    "Categories": "Network;InstantMessaging;",
+                    "StartupWMClass": "teams-linux"
+                }
+            }
+        },
+        "deb": {
+            "depends": [
+                "libgtk-3-0",
+                "libnotify4",
+                "libnss3",
+                "libxss1",
+                "libxtst6",
+                "xdg-utils"
+            ]
+        }
+    }
+}
