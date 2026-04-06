@@ -222,7 +222,8 @@ if (!gotTheLock) {
 ipcMain.on('notify', (event, data) => {
   const notif = new Notification({
     title: data.title,
-    body: data.body
+    body: data.body,
+    icon: path.join(__dirname, 'icon.png')
   })
 
   notif.on('click', () => {
