@@ -1,5 +1,6 @@
-const { app, BrowserWindow, Tray, ipcMain, Notification, Menu, shell } = require('electron')
+const { app, BrowserWindow, Tray, ipcMain, dialog, Notification, Menu, shell } = require('electron')
 const path = require('path')
+const pkg = require('./package.json')
 
 let win = null
 let tray = null
@@ -33,7 +34,6 @@ if (!gotTheLock) {
     win = new BrowserWindow({
       width: 1280,
       height: 800,
-      autoHideMenuBar: true,
       webPreferences: {
         preload: path.join(__dirname, 'preload.js'),
         contextIsolation: true,
@@ -42,10 +42,8 @@ if (!gotTheLock) {
       }
     })
 
-    win.setMenu(null)
-
     win.webContents.setUserAgent(CHROME_UA)
-    win.loadURL('https://teams.microsoft.com')
+    win.loadURL('https://teams.cloud.microsoft')
 
     // Click link trong chat → mở bằng trình duyệt mặc định
     win.webContents.setWindowOpenHandler(({ url }) => {
@@ -75,6 +73,60 @@ if (!gotTheLock) {
       }
     })
   }
+
+
+function showAboutDialog() {
+  const details = [
+    pkg.description || 'Desktop wrapper for YouTube',
+    '',
+    `Version: ${pkg.version || app.getVersion()}`,
+    `Author: ${pkg.author?.name || 'Unknown'}`,
+    pkg.author?.email ? `Contact: ${pkg.author.email}` : null,
+    pkg.homepage ? `Homepage: ${pkg.homepage}` : null,
+  ].filter(Boolean).join('\n')
+
+  dialog.showMessageBox({
+    type: 'info',
+    title: `About Microsoft Teams`,
+    message: 'Microsoft Teams',
+    detail: details,
+    icon: path.join(__dirname, 'icon.png'),
+    buttons: ['OK'],
+    defaultId: 0,
+    noLink: true,
+  }).catch(() => { })
+}
+
+function forceExitApp() {
+  app.isQuiting = true
+  app.exit(0)
+}
+
+function createApplicationMenu() {
+  const isMac = process.platform === 'darwin'
+  const template = [
+    ...(isMac ? [{ role: 'appMenu' }] : []),
+    {
+      label: isMac ? 'File' : '&File',
+      submenu: [
+        { role: 'close' },
+        { type: 'separator' },
+        { label: 'Exit', click: forceExitApp },
+      ],
+    },
+    { role: 'editMenu' },
+    { role: 'viewMenu' },
+    { role: 'windowMenu' },
+    {
+      role: 'help',
+      submenu: [
+        { label: `About`, click: showAboutDialog },
+      ],
+    },
+  ]
+
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template))
+}
 
   /**
    * Inject script để override Notification constructor
@@ -208,6 +260,7 @@ if (!gotTheLock) {
 
   app.whenReady().then(() => {
     app.userAgentFallback = CHROME_UA
+    createApplicationMenu()
     createWindow()
     createTray()
   })
